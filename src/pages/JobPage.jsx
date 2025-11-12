@@ -1,25 +1,48 @@
 import { useParams, useLoaderData, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { FaArrowLeft, FaMapMarker } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 const JobPage = ({ deleteJob }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const job = useLoaderData();
+  const [error, setError] = useState('');
 
-  const onDeleteClick = (jobId) => {
+  const { isAuthenticated, token } = useAuth();
+
+  const onDeleteClick = async(jobId) => {
+    if(!isAuthenticated) return navigate('/login');
+
     const confirm = window.confirm(
       'Are you sure you want to delete this listing?'
     );
 
     if (!confirm) return;
 
-    deleteJob(jobId);
+    try {
+        const data = await deleteJob(jobId, token);
+        if (data.status === 200) {
+          const details = await data.json();
+          navigate(`/jobs`);
+          toast.success("Job Deleted Successfully");
+        } else {
+          let errorMessage = `HTTP error! status: ${data.status}`;
 
-    toast.success('Job deleted successfully');
+          try {
+            const errorData = await data.json();
+            errorMessage = errorMessage + " " + errorData.detail;
+          } catch {
+            errorMessage = data.statusText || errorMessage;
+          }
 
-    navigate('/jobs');
+          setError(errorMessage);
+        }
+      } catch (error) {
+        setError(error.message);
+      }
   };
 
   return (
@@ -102,6 +125,7 @@ const JobPage = ({ deleteJob }) => {
                 >
                   Delete Job
                 </button>
+                {error && <p className='text-red-500 mt-4'>{error}</p>}
               </div>
             </aside>
           </div>

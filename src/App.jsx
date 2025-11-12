@@ -22,15 +22,19 @@ const App = () => {
       },
       body: JSON.stringify(newJob),
     });
-    return;
+    return res;
   };
 
   // Delete Job
-  const deleteJob = async (id) => {
+  const deleteJob = async (id, token) => {
     const res = await fetch(`/api/jobs/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
     });
-    return;
+    return res;
   };
 
   // Update Job
@@ -43,7 +47,7 @@ const App = () => {
       },
       body: JSON.stringify(job),
     });
-    return;
+    return res;
   };
 
     const login = async (user) => {

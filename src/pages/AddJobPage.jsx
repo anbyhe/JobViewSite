@@ -14,18 +14,19 @@ const AddJobPage = ({ addJobSubmit, updateJobSubmit }) => {
   const [companyDescription, setCompanyDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
   const [viewName, setViewName] = useState("Add");
   const { id } = useParams();
-  const { isAuthenticated, token} = useAuth()
+  const { isAuthenticated, token } = useAuth();
 
   useEffect(() => {
-    if(!isAuthenticated) 
+    if (!isAuthenticated)
       return () => {
-        navigate('/login');
-        return;    
-    }
+        navigate("/login");
+        return;
+      };
     if (id) {
       setViewName("Update");
       setTitle(job.title);
@@ -42,7 +43,7 @@ const AddJobPage = ({ addJobSubmit, updateJobSubmit }) => {
     }
   }, [id, job, isAuthenticated, navigate]);
 
-  const submitForm = (e) => {
+  const submitForm = async (e) => {
     e.preventDefault();
 
     if (viewName === "Update") {
@@ -60,11 +61,28 @@ const AddJobPage = ({ addJobSubmit, updateJobSubmit }) => {
           contactPhone,
         },
       };
-      updateJobSubmit(updatedJob, token);
+      try {
+        const data = await updateJobSubmit(updatedJob, token);
+        if (data.status === 200) {
+          const details = await data.json();
+          navigate(`/jobs/${id}`);
+          toast.success("Job Updated Successfully");
+        } else {
+          let errorMessage = `HTTP error! status: ${data.status}`;
 
-      toast.success("Job Updated Successfully");
+          try {
+            const errorData = await data.json();
+            errorMessage =
+              errorData.detail || errorData.message || errorMessage;
+          } catch {
+            errorMessage = data.statusText || errorMessage;
+          }
 
-      return navigate(`/jobs/${id}`);
+          setError(errorMessage);
+        }
+      } catch (error) {
+        setError(error.message);
+      }
     } else {
       const newJob = {
         title,
@@ -79,12 +97,28 @@ const AddJobPage = ({ addJobSubmit, updateJobSubmit }) => {
           contactPhone,
         },
       };
+       try {
+        const data = await addJobSubmit(newJob, token);
+        if (data.status === 200) {
+          const details = await data.json();
+          navigate(`/jobs`);
+          toast.success("Job Created Successfully");
+        } else {
+          let errorMessage = `HTTP error! status: ${data.status}`;
 
-      addJobSubmit(newJob, token);
+          try {
+            const errorData = await data.json();
+            errorMessage =
+              errorData.detail || errorData.message || errorMessage;
+          } catch {
+            errorMessage = data.statusText || errorMessage;
+          }
 
-      toast.success("Job Added Successfully");
-
-      return navigate("/jobs");
+          setError(errorMessage);
+        }
+      } catch (error) {
+        setError(error.message);
+      }
     }
   };
 
@@ -278,6 +312,7 @@ const AddJobPage = ({ addJobSubmit, updateJobSubmit }) => {
               >
                 {viewName} Job
               </button>
+              {error && <p className="text-red-500 mt-2">{error}</p>}
             </div>
           </form>
         </div>
