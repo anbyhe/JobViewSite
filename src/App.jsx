@@ -8,6 +8,8 @@ import NotFoundPage from './pages/NotFoundPage'
 import JobPage, { jobLoader } from './pages/JobPage'
 import EditJobPage from './pages/EditJobPage'
 import LoginPage from './pages/LoginPage'
+import WsPage from './pages/WsPage'
+import MyJobsPage from './pages/MyJobsPage'
 import axios from 'axios'
 import { AuthProvider} from './context/AuthContext'
 
@@ -81,7 +83,9 @@ const App = () => {
       <Route path="/add-job" element={<AddJobPage addJobSubmit={addJob}/>} />
       <Route path="/login" element={<LoginPage loginEvent={login} isLogin={true}/>} />
       <Route path="/register" element={<LoginPage createEvent={register} isLogin={false} />} />
+      <Route path="/my-jobs" element={<MyJobsPage />} />
       <Route path="*" element={<NotFoundPage />} />
+      <Route path="/test-job" element={<WsPage />} />
     </Route>
   )
 )

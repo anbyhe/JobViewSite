@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import logo from "../assets/images/logo.png";
 import { NavLink } from "react-router-dom";
-import { FaUserCog } from "react-icons/fa";
+import { FaUserCog, FaDollyFlatbed } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
 import { useAuth } from "../context/AuthContext";
 
@@ -76,6 +76,12 @@ const Navbar = () => {
                   </NavLink>
                   <NavLink to="/add-job" className={linkClass}>
                     Add Job
+                  </NavLink>
+                  <NavLink to="/test-job" className={linkClass}>
+                    Test
+                  </NavLink>
+                  <NavLink to="/my-jobs" className={linkClass}>
+                    <FaDollyFlatbed className="mt-1 text-red-500 w-6 h-6"/>
                   </NavLink>
                 </div>
               </div>
