@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import logo from "../assets/images/logo.png";
 import { NavLink } from "react-router-dom";
 import { FaUserCog, FaDollyFlatbed } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
 import { useAuth } from "../context/AuthContext";
+import { useSelector } from "react-redux";
 
 const Navbar = () => {
   const linkClass = ({ isActive }) =>
@@ -15,6 +16,8 @@ const Navbar = () => {
   const userMenuRef = useRef(null);
 
   const { logout, isAuthenticated, user } = useAuth();
+
+  const cartJobs = useSelector((state) => state.cart);
 
   const htmlTooltip = `
     <div class="p-2">
@@ -81,8 +84,17 @@ const Navbar = () => {
                     Test
                   </NavLink>
                   <NavLink to="/my-jobs" className={linkClass}>
-                    <FaDollyFlatbed className="mt-1 text-red-500 w-6 h-6"/>
-                  </NavLink>
+                  <div className="relative inline-flex items-center">
+                    <FaDollyFlatbed className="text-red-500 w-6 h-6" />
+                    {cartJobs.length > 0 && (
+                      <span
+                        className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold 
+                                  px-2 py-0.5 rounded-full shadow-md animate-bounce">
+                        {cartJobs.length}
+                      </span>
+                    )}
+                  </div>
+                </NavLink>
                 </div>
               </div>
               {isAuthenticated ? (

@@ -1,26 +1,34 @@
 import { useState, useEffect } from "react";
 import JobListing from "./JobListing";
 import Spinner from "./Spinner";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchJobs } from "../store/jobSlice";
+
 const JobListings = ({ isfromHome = false }) => {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  //const [jobs, setJobs] = useState([]);
+  //const [loading, setLoading] = useState(true);
+
+  const dispatch = useDispatch();
+  const { jobs, loading } = useSelector((state) => state.job);
 
   const url = isfromHome ? "/api/jobs?_limit=3" : "/api/jobs";
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        setJobs(data);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJobs();
-  }, []);
+
+    dispatch(fetchJobs(url));
+    // const fetchJobs = async () => {
+    //   try {
+    //     const res = await fetch(url);
+    //     const data = await res.json();
+    //     setJobs(data);
+    //   } catch (err) {
+    //     console.log(err);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+    // fetchJobs();
+  }, [url]);
   return (
     <section className="bg-blue-50 px-4 py-10">
       <div className="container-xl lg:container m-auto">
