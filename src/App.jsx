@@ -12,6 +12,7 @@ import WsPage from './pages/WsPage'
 import MyJobsPage from './pages/MyJobsPage'
 import axios from 'axios'
 import { AuthProvider} from './context/AuthContext'
+import EChartsDemo from './pages/EChartsDemo'
 
 const App = () => {
 
@@ -85,7 +86,7 @@ const App = () => {
       <Route path="/register" element={<LoginPage createEvent={register} isLogin={false} />} />
       <Route path="/my-jobs" element={<MyJobsPage />} />
       <Route path="*" element={<NotFoundPage />} />
-      <Route path="/test-job" element={<WsPage />} />
+      <Route path="/test-job" element={<EChartsDemo />} />
     </Route>
   )
 )

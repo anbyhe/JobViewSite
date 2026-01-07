@@ -11,6 +11,9 @@ const ChatBotWs = () => {
   const messagesEndRef = useRef(null);
   const wsRef = useRef(null);
   const sessionId = useRef(uuid());
+  const [recording, setRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunks = useRef([]);
 
 
   const scrollToBottom = () => {
@@ -170,6 +173,43 @@ const ChatBotWs = () => {
     setMessages([]);
     setActiveInterrupt(null); 
   };
+
+  const startRecording = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+
+  audioChunks.current = [];
+  mediaRecorderRef.current = mediaRecorder;
+
+  mediaRecorder.ondataavailable = (e) => audioChunks.current.push(e.data);
+
+  mediaRecorder.onstop = async () => {
+    const blob = new Blob(audioChunks.current, { type: "audio/webm" });
+    const arrayBuffer = await blob.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+    const payload = {
+      type: "voice",
+      thread_id: sessionId.current,
+      audio: base64
+    };
+
+    wsRef.current.send(JSON.stringify(payload));
+    setIsLoading(true);
+  };
+
+  mediaRecorder.start();
+  setRecording(true);
+};
+
+const stopRecording = () => {
+  if (mediaRecorderRef.current) {
+    mediaRecorderRef.current.stop();
+    // 停止所有媒体轨道以释放麦克风
+    mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+  }
+  setRecording(false);
+};
 
   return (
     <>
@@ -337,8 +377,25 @@ const ChatBotWs = () => {
                 disabled={isLoading}
               />
               <button
+                onClick={recording ? stopRecording : startRecording}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  recording
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-gray-500 hover:bg-gray-600 text-white'
+                }`}
+                title={recording ? 'Stop recording' : 'Start voice recording'}
+              >
+                {recording ? (
+                  <div className="w-4 h-4 bg-white rounded-full animate-pulse"></div>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                )}
+              </button>
+              <button
                 onClick={sendMessage}
-                disabled={!inputText.trim() || isLoading}
+                disabled={!inputText.trim() || isLoading || recording}
                 className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading ? (
